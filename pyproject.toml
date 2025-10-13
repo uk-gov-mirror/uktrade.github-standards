@@ -42,4 +42,4 @@ target-version = "py312"
 extend-select = ["T201"]
 
 [tool.coverage.run]
-omit = ['tests/*']
+omit = ["tests/*"]
