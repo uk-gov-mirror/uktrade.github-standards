@@ -5,8 +5,8 @@ from typing import List
 
 from src.hooks.config import (
     LOGGER,
-    TRUFFLEHOG_ERROR_CODE,
     TRUFFLEHOG_INFO_LOG_LEVEL,
+    TRUFFLEHOG_SUCCESS_CODE,
     TRUFFLEHOG_VERBOSE_LOG_LEVEL,
 )
 
@@ -31,7 +31,7 @@ class TrufflehogScanner:
 
         if self.github_action:
             # Scan all files in this branch
-            files_to_scan = ["file://"]
+            files_to_scan = ["file:///repo_files"]
             scan_mode = "git"
         else:
             # Scan the files passed in
@@ -46,6 +46,9 @@ class TrufflehogScanner:
             "--results=verified,unknown",
             f"--log-level={trufflehog_log_level}",
         ]
+
+        if self.github_action:
+            trufflehog_cmd_args.append("--since-commit=main")
 
         if os.path.exists("trufflehog-excludes.txt"):
             logger.debug("This repo has an exclusions file, adding this file to the trufflehog runner")
@@ -79,7 +82,7 @@ class TrufflehogScanner:
         trufflehog_response = trufflehog_run.stdout if trufflehog_run.stdout else trufflehog_run.stderr
         logger.debug("Trufflehog returncode was '%s'", trufflehog_run.returncode)
 
-        if trufflehog_run.returncode == TRUFFLEHOG_ERROR_CODE:
+        if trufflehog_run.returncode != TRUFFLEHOG_SUCCESS_CODE:
             logger.debug("Trufflehog security scan failed with result: %s", trufflehog_response)
             return trufflehog_response
 

@@ -26,4 +26,8 @@ run-hook-python:
 
 run-hook-docker:
 	make build-docker-testing
-	docker run --rm github-standards-hooks:testing run_scan --verbose /app/src
+	docker run --rm github-standards-hooks:testing run_scan --verbose
+
+run-hook-docker-github-action:
+	make build-docker-testing
+	docker run -v .:/repo_files --rm github-standards-hooks:testing run_scan --verbose --github-action repo_files

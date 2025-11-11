@@ -54,6 +54,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
+RUN apk update && \
+    apk add git
+
 ENTRYPOINT ["hooks-cli"]
 
 FROM base AS testing

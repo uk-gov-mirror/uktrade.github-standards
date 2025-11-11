@@ -1,0 +1,39 @@
+name: Security
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main, master, dev]
+
+jobs:
+  secret-scanning:
+    env:
+      IMAGE: ghcr.io/uktrade/github-standards:latest
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          fetch-depth: 0
+
+      - name: Build and push Docker image to GHCR
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          push: false
+          target: release
+          build-args: |
+            TRUFFLEHOG_VERSION=${{ vars.TRUFFLEHOG_VERSION }}
+          tags: sec-testing
+          provenance: false # This is here to avoid ghcr having an image for unknown/unknown
+
+      - name: Secret Scanning using our docker image
+        run: |
+          docker run -e FORCE_HOOK_CHECKS=0 --rm -v .:/repo_files -w /repo_files \
+          sec-testing \
+          run_scan \
+          --verbose \
+          --github-action \
+          repo_files
