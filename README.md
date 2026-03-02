@@ -79,16 +79,14 @@ The commit-msg hook stage is passes a single parameter, which is the name of the
 
 # Releasing
 
-There is a github workflow that will automatically create a new docker tag, and a github release when a change to the `version` tag inside the `pyproject.toml` file is detected. When a new version needs to be released:
+We are using the release-please GitHub action for controlling releases. A detailed description can be found on the release-please [documentation page](https://github.com/googleapis/release-please).
 
-1. Open the `pyproject.toml` file, and update the `version` tag to a new value. We use semantic versioning, see [this article](https://www.geeksforgeeks.org/software-engineering/introduction-semantic-versioning/) for help determining what the new version value should be
-2. Run `uv sync` to ensure the package is set to the correct version
-3. Open a PR into main. Once approved, merging will trigger a new release
+Any PR merges into the main branch will trigger the creation/update of a release-please managed release PR. This PR can be merged at anytime and will:
 
-You will now have:
-
-- A github release using the new version, set to the be the latest version
-- A docker image build and deployed to our [container registry](https://github.com/uktrade/github-standards/pkgs/container/github-standards)
+- Create a new github release with the next semantic version
+- Update the pyproject.toml file with the latest version
+- Update the .release-please-manifest.json file with the latest version
+- Build and deploy a new docker image
 
 # Usage
 
