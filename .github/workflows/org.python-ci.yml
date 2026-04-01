@@ -56,53 +56,18 @@ jobs:
         with:
           sarif_file: ${{env.results-file}}
 
-  vulnerability-scan:
-    # Checking for public, skipping private and internal
-    if: ${{ github.event.repository.visibility == 'public' }}
-    env:
-      audit-dir: "audit-reports"
+  dependency-review:
     permissions:
-      contents: read
-      issues: write
       pull-requests: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
-      - name: "Git clone the repository"
+      - name: "Checkout Repository"
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
-      - name: "Git clone the standards repository"
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - name: "Dependency Review"
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48
         with:
-          repository: "uktrade/github-standards"
-          path: github-standards
-          sparse-checkout: .github/actions # This appears misleading, it always checks out the entire repo contents
-
-      - name: Python Runtime End of Life check
-        if: github.event_name == 'pull_request'
-        uses: ./github-standards/.github/actions/runtime-eol/python
-        continue-on-error: true
-        with:
-          python-version: ${{ vars.PYTHON_VERSION }}
-
-      - name: "Create audit directory"
-        if: env.PYTHON_TOO_OLD != 'true'
-        shell: bash
-        run: mkdir -p "${{ env.audit-dir }}"
-        continue-on-error: true
-
-      - name: "Run Python audit (v${{ vars.PYTHON_VERSION }})"
-        if: env.PYTHON_TOO_OLD != 'true'
-        uses: ./github-standards/.github/actions/vulnerability-scan/python
-        continue-on-error: true
-        with:
-          python-version: ${{ vars.PYTHON_VERSION }}
-          audit-dir: ${{ env.audit-dir }}
-
-      - name: Notify PR creator
-        # TODO: Ensure only a single comment is created per PR, updated on each run
-        if: env.PYTHON_TOO_OLD != 'true' && github.event_name == 'pull_request' && github.event.action == 'opened'
-        uses: ./github-standards/.github/actions/notify/vulnerability
-        continue-on-error: true
-        with:
-          token: ${{ github.token }}
-          audit-dir: ${{ env.audit-dir }}
+          comment-summary-in-pr: always
+          warn-only: true
+          license-check: false
