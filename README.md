@@ -165,9 +165,17 @@ Although bandit provides a [github action](https://github.com/PyCQA/bandit-actio
 
 There is a `bandit-version` `env` variable in this job, that is used to install a specific bandit version. This variable must match a github [release version](https://github.com/PyCQA/bandit/releases)
 
-# GitHub actions
+# GitHub Actions
 
 This repository contains GitHub actions that are triggered by a set of GitHub Rulesets defined at the organisation level. Any repository in the uktrade organisation can opt in to using these GitHub actions by adding GitHub Custom properties to the repository.
+
+## Terraform Workflow
+
+The reusable Terraform workflow defined in this repository checks Terraform code in your repository against a number of standard tools: `terraform fmt`, `terraform validate` and `tflint`. If any of these checks do not exit successfully, the job will fail and you will need to make changes to your code to get it through the CI checks. Because a lot of the Terraform modules we use in our code are hosted in private GitHub repositories, we have had to create a GitHub App to allow them to be pulled into the GitHub Action at runtime. Therefore, there are some pre-requisites you must satisfy before this reusable workflow will work on your repository:
+
+1. You must grant your repository access to the organisation-level secrets `TERRAFORM_MODULE_ACCESS_APP_ID` and `TERRAFORM_MODULE_ACCESS_PRIVATE_KEY` [here](https://github.com/organizations/uktrade/settings/secrets/actions) - if you do not have access to do this, SRE can facilitate it for you.
+2. You must grant the GitHub App `uktrade-terraform-module-access` [here](https://github.com/organizations/uktrade/settings/installations/98143778) repository access to both your repository **and** the repository hosting the module your code is using. 
+3. You must select the `Terraform (HCL)` option in the `language` custom property on your repository.
 
 ## Testing changes
 
